@@ -1,0 +1,373 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>বই বাজার</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7f5;
+    color: #222;
+}
+
+header {
+    background: #087443;
+    color: white;
+    text-align: center;
+    padding: 20px 10px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header p {
+    margin-bottom: 0;
+}
+
+.search-box {
+    padding: 15px;
+    background: white;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.categories {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    overflow-x: auto;
+    background: white;
+}
+
+.categories button {
+    white-space: nowrap;
+    padding: 10px 14px;
+    background: #e4f3eb;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.categories button.active {
+    background: #087443;
+    color: white;
+}
+
+.section-title {
+    padding: 0 15px;
+}
+
+.book-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px;
+}
+
+.book-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 7px #00000012;
+    padding-bottom: 12px;
+}
+
+.book-card img {
+    width: 100%;
+    height: 155px;
+    object-fit: contain;
+    background: #edf3ef;
+}
+
+.book-card h3 {
+    font-size: 15px;
+    margin: 10px 8px 5px;
+}
+
+.book-card p {
+    font-size: 13px;
+    color: #666;
+    margin: 5px 8px;
+}
+
+.price {
+    color: #087443 !important;
+    font-size: 18px !important;
+    font-weight: bold;
+}
+
+.book-card button {
+    display: block;
+    width: calc(100% - 16px);
+    margin: 8px;
+    padding: 10px 5px;
+    background: #087443;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.book-card .details-btn {
+    background: #e4f3eb;
+    color: #087443;
+}
+
+.empty {
+    text-align: center;
+    padding: 30px;
+    grid-column: 1 / -1;
+}
+
+.contact {
+    text-align: center;
+    background: white;
+    margin-top: 20px;
+    padding: 25px 10px;
+}
+
+.contact a {
+    display: inline-block;
+    background: #087443;
+    color: white;
+    padding: 12px 20px;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+footer {
+    text-align: center;
+    background: #075b36;
+    color: white;
+    padding: 15px;
+    font-size: 13px;
+}
+
+@media (min-width: 700px) {
+    .book-container {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1 id="shopName">📚 বই বাজার</h1>
+    <p>আপনার পছন্দের বই কিনুন সহজেই</p>
+</header>
+
+<div class="search-box">
+    <input
+        type="search"
+        id="searchInput"
+        placeholder="বইয়ের নাম লিখে খুঁজুন..."
+        oninput="renderBooks()"
+    >
+</div>
+
+<div class="categories" id="categories"></div>
+
+<h2 class="section-title">📖 আমাদের বইসমূহ</h2>
+
+<div class="book-container" id="bookContainer"></div>
+
+<section class="contact">
+    <h2>📞 যোগাযোগ করুন</h2>
+    <p>বই অর্ডার করতে আমাদের সঙ্গে যোগাযোগ করুন।</p>
+    <a id="contactButton" href="tel:01XXXXXXXXX">
+        ফোন করুন
+    </a>
+</section>
+
+<footer>
+    <p>© 2026 বই বাজার | সর্বস্বত্ব সংরক্ষিত</p>
+</footer>
+
+<script>
+
+// নিজের দোকানের নাম এখানে পরিবর্তন করুন
+const SHOP_NAME = "বই বাজার";
+
+// নিজের ফোন নম্বর এখানে লিখুন
+const PHONE = "01XXXXXXXXX";
+
+// বইয়ের তথ্য এখানে পরিবর্তন করুন
+// নতুন বই যোগ করতে নিচের তালিকায় আরেকটি বই লিখুন
+
+const books = [
+    {
+        id: 1,
+        name: "অনার্স প্রথম বর্ষের বই",
+        category: "অনার্স",
+        price: 350,
+        image: "https://placehold.co/300x400/e4f3eb/087443?text=Honours+Book",
+        description: "অনার্স প্রথম বর্ষের পাঠ্যবই।"
+    },
+    {
+        id: 2,
+        name: "ডিগ্রি প্রথম বর্ষের বই",
+        category: "ডিগ্রি",
+        price: 300,
+        image: "https://placehold.co/300x400/e4f3eb/087443?text=Degree+Book",
+        description: "ডিগ্রি প্রথম বর্ষের পাঠ্যবই।"
+    },
+    {
+        id: 3,
+        name: "মাস্টার্সের বই",
+        category: "মাস্টার্স",
+        price: 450,
+        image: "https://placehold.co/300x400/e4f3eb/087443?text=Masters+Book",
+        description: "মাস্টার্সের পাঠ্যবই।"
+    },
+    {
+        id: 4,
+        name: "ইংরেজি শেখার বই",
+        category: "অন্যান্য",
+        price: 250,
+        image: "https://placehold.co/300x400/e4f3eb/087443?text=English+Book",
+        description: "ইংরেজি শেখার সহায়ক বই।"
+    }
+];
+
+let selectedCategory = "সব বই";
+
+document.getElementById("shopName").textContent =
+    "📚 " + SHOP_NAME;
+
+document.getElementById("contactButton").href =
+    "tel:" + PHONE;
+
+function renderCategories() {
+    const categories = [
+        "সব বই",
+        ...new Set(books.map(book => book.category))
+    ];
+
+    document.getElementById("categories").innerHTML =
+        categories.map(category => `
+            <button
+                class="${selectedCategory === category ? 'active' : ''}"
+                onclick="selectCategory(${JSON.stringify(category)})">
+                ${category}
+            </button>
+        `).join("");
+}
+
+function selectCategory(category) {
+    selectedCategory = category;
+    renderCategories();
+    renderBooks();
+}
+
+function renderBooks() {
+    const query = document
+        .getElementById("searchInput")
+        .value.trim()
+        .toLowerCase();
+
+    const filteredBooks = books.filter(book => {
+        const matchesSearch =
+            book.name.toLowerCase().includes(query) ||
+            book.category.toLowerCase().includes(query);
+
+        const matchesCategory =
+            selectedCategory === "সব বই" ||
+            book.category === selectedCategory;
+
+        return matchesSearch && matchesCategory;
+    });
+
+    const container = document.getElementById("bookContainer");
+
+    if (filteredBooks.length === 0) {
+        container.innerHTML =
+            '<div class="empty">দুঃখিত! কোনো বই পাওয়া যায়নি।</div>';
+        return;
+    }
+
+    container.innerHTML = filteredBooks.map(book => `
+        <div class="book-card">
+            <img
+                src="${book.image}"
+                alt="${book.name}"
+                onerror="this.src='https://placehold.co/300x400?text=Book'"
+            >
+
+            <h3>${book.name}</h3>
+
+            <p>ক্যাটাগরি: ${book.category}</p>
+
+            <p class="price">৳${book.price}</p>
+
+            <button onclick="orderBook(${book.id})">
+                📞 অর্ডার করুন
+            </button>
+
+            <button class="details-btn"
+                onclick="showDetails(${book.id})">
+                বিস্তারিত দেখুন
+            </button>
+        </div>
+    `).join("");
+}
+
+function showDetails(id) {
+    const book = books.find(item => item.id === id);
+
+    alert(
+        "বইয়ের নাম: " + book.name +
+        "\nদাম: ৳" + book.price +
+        "\nক্যাটাগরি: " + book.category +
+        "\nবিবরণ: " + book.description
+    );
+}
+
+function orderBook(id) {
+    const book = books.find(item => item.id === id);
+
+    const message =
+        "আসসালামু আলাইকুম, আমি " +
+        book.name +
+        " বইটি অর্ডার করতে চাই। বইয়ের দাম ৳" +
+        book.price +
+        "।";
+
+    const whatsappNumber = PHONE.replace(/\D/g, "");
+
+    if (whatsappNumber.length < 10) {
+        alert("প্রথমে কোডের PHONE অংশে আপনার সঠিক ফোন নম্বর বসান।");
+        return;
+    }
+
+    window.open(
+        "https://wa.me/" + whatsappNumber +
+        "?text=" + encodeURIComponent(message),
+        "_blank"
+    );
+}
+
+renderCategories();
+renderBooks();
+
+</script>
+
+</body>
+</html>
